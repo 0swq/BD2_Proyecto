@@ -11,7 +11,7 @@ import '../App.css';
 export default function Inicio() {
   return (
     <div className="min-h-screen bg-black text-white m-0 p-0 w-full">
-      <Header login={true} />
+      <Header login={false} />
       <HeroSection />
       <UploadSection />
       <PricingSection />

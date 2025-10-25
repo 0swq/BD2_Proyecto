@@ -1,9 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // <- IMPORTA Link
+import { Link } from 'react-router-dom';
 export default function Header({login}) {
     let buttons;
 
-    if (login) {
+    if (login===false) {
         buttons = (
             <>
                 <button className="px-6 py-2 border border-gray-600 rounded-full hover:border-gray-400 transition">
