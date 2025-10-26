@@ -14,6 +14,7 @@ class CassandraConnection:
                 return cls.instancia
             except Exception as e:
                 raise RuntimeError(f"Error al conectar a Cassandra: {e}")
+        return None
 
     def get_session(self):
         return self.sesion

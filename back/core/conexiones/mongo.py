@@ -14,6 +14,8 @@ class MongoConnection:
                 return cls.instancia
             except Exception as e:
                 raise RuntimeError(f"Error al conectar a Mongo: {e}")
+        return None
+
     def get_cliente(self):
         return self.cliente
 
