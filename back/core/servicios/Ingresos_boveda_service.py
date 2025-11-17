@@ -1,45 +1,38 @@
-from core.entidades.Ingresos_boveda import IngresoBovedaSQL, IngresoBovedaNOSQL
-from infra.crud.Ingresos_boveda_repository import Ingresos_bovedaInterface
+from infra.crud.Ingresos_boveda_repository import Ingresos_bovedaInterface, Ingresos_bovedaPostGre, \
+    Ingresos_bovedaOracle, Ingresos_bovedaCassandra, Ingresos_bovedaMongo
 from typing import List, Dict, Any, Optional
 
 
 class Ingresos_boveda_service:
-    def __init__(self,
-                 postgre_repo: Ingresos_bovedaInterface,
-                 oracle_repo: Ingresos_bovedaInterface,
-                 mongo_repo: Ingresos_bovedaInterface,
-                 cassandra_repo: Ingresos_bovedaInterface):
-        self.postgre = postgre_repo
-        self.oracle = oracle_repo
-        self.mongo = mongo_repo
-        self.cassandra = cassandra_repo
+    def __init__(self):
+        self.postgre = Ingresos_bovedaPostGre()
+        self.oracle = Ingresos_bovedaOracle()
+        self.mongo = Ingresos_bovedaMongo()
+        self.cassandra = Ingresos_bovedaCassandra()
+        self.bd = [self.postgre, self.oracle, self.mongo, self.cassandra]
 
-    def crear(self, ingreso_boveda_sql: IngresoBovedaSQL, ingreso_boveda_nosql: IngresoBovedaNOSQL):
-        self.postgre.create(ingreso_boveda_sql)
-        self.oracle.create(ingreso_boveda_sql)
-        self.mongo.create(ingreso_boveda_nosql)
-        self.cassandra.create(ingreso_boveda_nosql)
+    def crear(self, ingreso_boveda):
+        for bd in self.bd:
+            bd.create(ingreso_boveda)
 
-    def modificar(self, ingreso_boveda_sql: IngresoBovedaSQL, ingreso_boveda_nosql: IngresoBovedaNOSQL):
-        self.postgre.update(ingreso_boveda_sql)
-        self.oracle.update(ingreso_boveda_sql)
-        self.mongo.update(ingreso_boveda_nosql)
-        self.cassandra.update(ingreso_boveda_nosql)
+    def modificar(self, ingreso_boveda):
+        for bd in self.bd:
+            bd.update(ingreso_boveda)
 
     def obtener(self, id: str) -> Optional[Dict[str, Any]]:
         return self.mongo.get(id)
 
     def eliminar(self, id: str) -> Dict[str, bool]:
         resultados = {
-        "postgre" : self.postgre.delete(id),
-        "oracle" : self.oracle.delete(id),
-        "mongo" : self.mongo.delete(id),
-        "cassandra" : self.cassandra.delete(id)
+            "postgre" : self.postgre.delete(id),
+            "oracle" : self.oracle.delete(id),
+            "mongo" : self.mongo.delete(id),
+            "cassandra" : self.cassandra.delete(id)
         }
         return resultados
 
-    def listar(self) -> List[Dict[str, Any]]:
+    def listar(self):
         return self.mongo.list()
 
-    def listar_por_ID(self, id: str) -> Optional[Dict[str, Any]]:
-        return self.mongo.list_id(id)
+    def listar_por_ID(self, id: str):
+        return self.mongo.list_ID_Usuario(id)

@@ -1,6 +1,8 @@
 
 from datetime import datetime
+from typing import Optional
 
+from pydantic import BaseModel
 #SQLAlchemy
 from sqlalchemy import Column, Integer, LargeBinary, DateTime, ForeignKey, String
 from sqlalchemy.orm import relationship, declarative_base
@@ -9,40 +11,53 @@ from sqlalchemy.orm import relationship, declarative_base
 from cassandra.cqlengine.models import Model
 from cassandra.cqlengine import columns
 
-from core.entidades import Datos_generales
+from core.entidades import Datos_generales , Base
 
-Base = declarative_base()
+
+class File(BaseModel):
+    ID_File: Optional[str] = None
+    filename: str
+    ubicacion: Optional[str] = None
+    path: Optional[str] = None
+    tamano: Optional[int] = None
+    fecha_subida: datetime = datetime.utcnow()
+    tipo_medio: Optional[str] = None
+    id_usuario: Optional[str] = None
+    contrasena_hash: Optional[bytes] = None
+    contrasena_salt : Optional[bytes] = None
 
 class FileSQL(Base):
     __tablename__ = "FileSQL"
-
-    ID_File = Column(String, primary_key=True)
-    filename = Column(String, nullable=False)
-    contenido = Column(LargeBinary, nullable=False)
-    ubicacion = Column(String, nullable=True)
-    path = Column(String, nullable=True)
-    tamaño = Column(Integer, nullable=True)
+    __table_args__ = {'schema': 'C##PROYECTO'}
+    ID_File = Column(String(36), primary_key=True)
+    filename = Column(String(255), nullable=False)
+    ubicacion = Column(String(255), nullable=True)
+    path = Column(String(512), nullable=True)
+    tamano = Column(Integer, nullable=True)
     fecha_subida = Column(DateTime, default=datetime.utcnow)
-    tipo_medio = Column(String, nullable=True)
-
-    usuario_id = Column(String, ForeignKey('UsuarioSQL.ID_Usuario'))
+    tipo_medio = Column(String(100), nullable=True)
+    contrasena_hash = Column(LargeBinary, nullable=True)
+    contrasena_salt= Column(LargeBinary, nullable=True)
+    id_usuario = Column(String(36), ForeignKey('C##PROYECTO.UsuarioSQL.ID_Usuario'))
     usuario = relationship("UsuarioSQL", back_populates="file")
 
     def __str__(self):
         return ', '.join(f"{k}: {v}" for k, v in vars(self).items())
 
+
 class FileNOSQL(Model):
     __keyspace__ = Datos_generales.nosql_nombre
 
-    ID_File = columns.UUID(primary_key=True)
+    ID_File = columns.Text(primary_key=True)
     filename = columns.Text()
-    contenido = columns.Blob()
     ubicacion = columns.Text()
     path = columns.Text()
-    tamaño = columns.Integer()
+    tamano = columns.Integer()
     fecha_subida = columns.DateTime(default=datetime.utcnow)
     tipo_medio = columns.Text()
-    usuario_id = columns.UUID()
+    id_usuario = columns.UUID()
+    contrasena_hash = columns.Blob()
+    contrasena_salt= columns.Blob()
 
     def __str__(self):
         return ', '.join(f"{k}: {v}" for k, v in vars(self).items())

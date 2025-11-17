@@ -1,9 +1,10 @@
 from bson import ObjectId
-from core.entidades.Usuario import UsuarioSQL, UsuarioNOSQL
+from core.entidades.Usuario import UsuarioSQL, UsuarioNOSQL, Usuario
 from core.conexiones.mongo import MongoConnection
 from core.conexiones.oracle import OracleConnection
 from core.conexiones.postgres import PostgreConnection
 from core.conexiones.cassandra import CassandraConnection
+from utils.fst import cop
 
 conexionPostgre = PostgreConnection()
 conexionOracle = OracleConnection()
@@ -13,16 +14,24 @@ conexionCassandra = CassandraConnection()
 
 class UsuarioInterface:
     def create(self, entity): pass
+
     def get(self, id): pass
+
     def delete(self, id): pass
+
     def update(self, entity): pass
-    def list(self): pass # Añadido list()
-    def list_id(self, id): pass # Añadido list_id(id)
+
+    def list(self): pass
+
+    def list_ID_Usuario(self, id): pass
+
 
 class UsuarioPostGre(UsuarioInterface):
-    def create(self, usuario_sql: UsuarioSQL):
+    def create(self, usuario: Usuario):
+        datos = usuario.model_dump(exclude_unset=True)
+        usuario = UsuarioSQL(**datos)
         with conexionPostgre.get_session() as session:
-            session.add(usuario_sql)
+            session.add(usuario)
 
     def get(self, id):
         with conexionPostgre.get_session() as session:
@@ -36,24 +45,34 @@ class UsuarioPostGre(UsuarioInterface):
                 return True
             return False
 
-    def update(self, usuario_sql: UsuarioSQL):
+    def update(self, usuario):
+        usuario_limpio = {k: v for k, v in usuario.items() if k != "_id"}
+        usuario_sql = UsuarioSQL(**usuario_limpio)
         with conexionPostgre.get_session() as session:
             obj = session.query(UsuarioSQL).filter_by(ID_Usuario=usuario_sql.ID_Usuario).one_or_none()
             if obj:
-                data_to_update = {k: v for k, v in usuario_sql.__dict__.items() if
-                                  not k.startswith('_') and k != "ID_Usuario"}
+                para_actualizar = {k: v for k, v in usuario_sql.__dict__.items() if
+                                   not k.startswith('_') and k != "ID_Usuario"}
 
-                for attr, value in data_to_update.items():
+                for attr, value in para_actualizar.items():
                     setattr(obj, attr, value)
 
                 return True
             return False
+
+    def list(self):
+        pass
+
+    def list_ID_Usuario(self, id_usuario):
+        pass
 
 
 class UsuarioOracle(UsuarioInterface):
-    def create(self, usuario_sql: UsuarioSQL):
+    def create(self, usuario: Usuario):
+        datos = usuario.model_dump(exclude_unset=True)
+        usuario = UsuarioSQL(**datos)
         with conexionOracle.get_session() as session:
-            session.add(usuario_sql)
+            session.add(usuario)
 
     def get(self, id):
         with conexionOracle.get_session() as session:
@@ -67,60 +86,75 @@ class UsuarioOracle(UsuarioInterface):
                 return True
             return False
 
-    def update(self, usuario_sql: UsuarioSQL):
+    def update(self, usuario):
+        usuario_limpio = {k: v for k, v in usuario.items() if k != "_id"}
+        usuario_sql = UsuarioSQL(**usuario_limpio)
         with conexionOracle.get_session() as session:
             obj = session.query(UsuarioSQL).filter_by(ID_Usuario=usuario_sql.ID_Usuario).one_or_none()
             if obj:
-                data_to_update = {k: v for k, v in usuario_sql.__dict__.items() if
-                                  not k.startswith('_') and k != "ID_Usuario"}
+                para_actualizar = {k: v for k, v in usuario_sql.__dict__.items() if
+                                   not k.startswith('_') and k != "ID_Usuario"}
 
-                for attr, value in data_to_update.items():
+                for attr, value in para_actualizar.items():
                     setattr(obj, attr, value)
 
                 return True
             return False
 
+    def list(self):
+        pass
+
+    def list_ID_Usuario(self, id_usuario):
+        pass
+
 
 class UsuarioMongo(UsuarioInterface):
-    def create(self, usuario_nosql: UsuarioNOSQL):
+    def create(self, usuario: Usuario):
+        datos = usuario.model_dump(exclude_unset=True)
         db = conexionMongo.get_db()
-        return db.usuario.insert_one(vars(usuario_nosql))
+        return db.UsuarioNOSQL.insert_one(datos)
 
     def get(self, id):
         db = conexionMongo.get_db()
-        return db.usuario.find_one({"_id": ObjectId(id)})
+        return db.UsuarioNOSQL.find_one({"ID_Usuario": id})
 
     def delete(self, id):
         db = conexionMongo.get_db()
-        result = db.usuario.delete_one({"_id": ObjectId(id)})
+        result = db.UsuarioNOSQL.delete_one({"ID_Usuario": id})
         return result.deleted_count > 0
 
-    def update(self, usuario_nosql: UsuarioNOSQL):
+    def update(self, usuario):
         db = conexionMongo.get_db()
-        update_data = {k: v for k, v in vars(usuario_nosql).items() if k != "ID_Usuario"}
-        result = db.usuario.update_one(
-            {"_id": ObjectId(usuario_nosql.ID_Usuario)},
-            {"$set": update_data}
+        actualizado = {k: v for k, v in usuario.items() if k != "ID_Usuario" and k != "_id"}
+        result = db.UsuarioNOSQL.update_one(
+            {"ID_Usuario": usuario["ID_Usuario"]},
+            {"$set": actualizado}
         )
         return result.modified_count > 0
 
     def list(self):
         db = conexionMongo.get_db()
-        usuarios = db.usuario.find()
-        return [{**u, "_id": str(u["_id"])} for u in usuarios]
+        usuarios = db.UsuarioNOSQL.find()
+        return [{**u, "ID_Usuario": str(u["ID_Usuario"])} for u in usuarios]
 
-    def list_id(self, id):
+    def list_ID_Usuario(self, id_usuario): pass
+
+    def get_cEmail(self, email):
         db = conexionMongo.get_db()
-        usuario = db.usuario.find_one({"_id": ObjectId(id)})
-        if usuario:
-            usuario["_id"] = str(usuario["_id"])
+        return db.UsuarioNOSQL.find_one({"email": email}) is not None
+
+    def get_Email(self, email):
+        db = conexionMongo.get_db()
+        usuario = db.UsuarioNOSQL.find_one({"email": email})
         return usuario
 
 
 class UsuarioCassandra(UsuarioInterface):
-    def create(self, usuario_nosql: UsuarioNOSQL):
-        usuario_nosql.save()
-        return usuario_nosql
+    def create(self, usuario: Usuario):
+        datos = usuario.model_dump(exclude_unset=True)
+        usuario = UsuarioNOSQL(**datos)
+        usuario.save()
+        return usuario
 
     def get(self, id):
         return UsuarioNOSQL.objects(ID_Usuario=id).first()
@@ -132,15 +166,23 @@ class UsuarioCassandra(UsuarioInterface):
             return True
         return False
 
-    def update(self, usuario_nosql: UsuarioNOSQL):
+    def update(self, usuario):
+        usuario_limpio = {k: v for k, v in usuario.items() if k != "_id"}
+        usuario_nosql = UsuarioNOSQL(**usuario_limpio)
         obj = self.get(usuario_nosql.ID_Usuario)
         if obj:
-            data_to_update = {k: v for k, v in usuario_nosql.__dict__.items() if
-                              not k.startswith('_') and k != "ID_Usuario"}
+            para_actualizar = {k: v for k, v in usuario_nosql.__dict__.items() if
+                               not k.startswith('_') and k != "ID_Usuario"}
 
-            for attr, value in data_to_update.items():
+            for attr, value in para_actualizar.items():
                 setattr(obj, attr, value)
 
             obj.save()
             return True
         return False
+
+    def list(self):
+        pass
+
+    def list_ID_Usuario(self, id_usuario):
+        pass
