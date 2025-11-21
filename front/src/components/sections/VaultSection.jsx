@@ -17,7 +17,7 @@ export default function VaultSection() {
                             {logeado ? "Ir a Bóveda" : "Ingresar"}
                         </Button>
                     </Link>
-                    <div className="mt-8 text-sm text-gray-500">FIGURE</div>
+                    <div className="mt-8 text-sm text-gray-500">FICURE</div>
                 </div>
             </div>
         </section>

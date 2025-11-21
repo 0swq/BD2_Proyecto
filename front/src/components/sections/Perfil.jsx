@@ -25,7 +25,7 @@ export function Perfil_user() {
 
     useEffect(() => {
         if (!usuario) return;
-        console.log("Perfil actuak:", usuario);
+        console.log("Perfil actual:", usuario);
         setNombres(usuario.nombres || '');
         setApellidos(usuario.apellidos || '');
         setCorreo(usuario.email || '');
@@ -213,11 +213,11 @@ export function Perfil_user() {
     };
 
     return (
-        <div className="px-36 flex flex-col bg-gradient-to-br from-black to-gray-900 min-h-screen justify-center">
-            <div>
-                <div className="flex items-center gap-6 mb-3">
+        <div className="flex-1 bg-gradient-to-br from-black to-gray-900 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+            <div className="max-w-7xl mx-auto h-full flex flex-col justify-center">
+                <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4 sm:gap-6 mb-3">
                     <label
-                        className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-blue-500 cursor-pointer group">
+                        className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-blue-500 cursor-pointer group flex-shrink-0">
                         <input
                             type="file"
                             accept="image/png,image/jpeg,image/jpg"
@@ -251,14 +251,14 @@ export function Perfil_user() {
                             </div>
                         </div>
                     </label>
-                    <div>
-                        <h1 className="text-white text-3xl font-bold text-left">{usuario.nombres + " " + usuario.apellidos}</h1>
-                        <p className="text-lime-400 text-xl text-left">{usuario.email}</p>
+                    <div className="text-center sm:text-left">
+                        <h1 className="text-white text-2xl sm:text-3xl font-bold">{usuario.nombres + " " + usuario.apellidos}</h1>
+                        <p className="text-lime-400 text-lg sm:text-xl break-all">{usuario.email}</p>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-10">
-                    <div className="bg-gray-800/50 backdrop-blur-sm rounded-3xl p-8 border border-gray-700">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
+                    <div className="bg-gray-800/50 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-gray-700">
                         <div className="space-y-3">
                             <div>
                                 <label className="text-white text-sm font-medium block mb-2 text-left">
@@ -320,7 +320,7 @@ export function Perfil_user() {
                     </div>
 
                     <div
-                        className="bg-gray-800/50 backdrop-blur-sm rounded-3xl p-8 border border-gray-700 flex flex-col items-center justify-center">
+                        className="bg-gray-800/50 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-gray-700 flex flex-col items-center justify-center">
                         <p className="text-gray-400 text-center mb-6">
                             Subir foto para generar nuevo vector biométrico
                         </p>
@@ -333,8 +333,8 @@ export function Perfil_user() {
                                 className="hidden"
                             />
                             <div
-                                className="w-48 h-48 border-4 border-dashed border-gray-600 rounded-3xl flex items-center justify-center group-hover:border-lime-400 transition-all duration-300">
-                                <Upload className="w-20 h-20 text-gray-600 group-hover:text-lime-400 transition-colors"
+                                className="w-36 h-36 sm:w-48 sm:h-48 border-4 border-dashed border-gray-600 rounded-3xl flex items-center justify-center group-hover:border-lime-400 transition-all duration-300">
+                                <Upload className="w-16 h-16 sm:w-20 sm:h-20 text-gray-600 group-hover:text-lime-400 transition-colors"
                                         strokeWidth={1.5}/>
                             </div>
                         </label>
@@ -345,9 +345,9 @@ export function Perfil_user() {
             </div>
 
             {showPasswordModal && (
-                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-                    <div className="bg-gray-800 rounded-3xl p-8 w-full max-w-md border border-gray-700">
-                        <h2 className="text-white text-2xl font-quicksand mb-6">Cambiar Contraseña</h2>
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-800 rounded-3xl p-6 sm:p-8 w-full max-w-md border border-gray-700">
+                        <h2 className="text-white text-xl sm:text-2xl font-quicksand mb-6">Cambiar Contraseña</h2>
 
                         <div className="space-y-4">
                             <div>

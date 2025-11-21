@@ -150,8 +150,84 @@ export const usuarios_service = {
             console.error("Error al obtener registro biometrico:", error);
             return {success: false, error: "Error de conexión"};
         }
+    },
+    async listarTodos(token) {
+        try {
+            const response = await fetch(`${API_URL}/usuarios/obtener`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
+            const resultado = await response.json();
+            if (resultado.success && resultado.usuarios) {
+                return {success: true, usuarios: resultado.usuarios};
+            }
+            return {success: false, error: resultado.error || 'Fallo al obtener usuarios'};
+        } catch (error) {
+            console.error("Error al listar usuarios:", error);
+            return {success: false, error: "Error de conexión"};
+        }
+    },
+    async eliminar(token) {
+        try {
+            const response = await fetch(`${API_URL}/usuarios/eliminar`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
+            const resultado = await response.json();
+            if (resultado.success) {
+                return {success: true};
+            }
+            return {success: false, error: resultado.error || 'Fallo al eliminar usuario'};
+        } catch (error) {
+            console.error("Error al eliminar usuario:", error);
+            return {success: false, error: "Error de conexión"};
+        }
+    },
+    async actualizarUsuario(token, datos) {
+        try {
+            const response = await fetch(`${API_URL}/usuarios/actualizar_usuario`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify(datos),
+            });
+            const resultado = await response.json();
+            if (resultado.success) {
+                return {success: true, mensaje: resultado.mensaje};
+            }
+            return {success: false, error: resultado.error || 'Fallo al actualizar usuario'};
+        } catch (error) {
+            console.error("Error al actualizar usuario:", error);
+            return {success: false, error: "Error de conexión"};
+        }
+    },
+    async eliminarUsuario(token, id_usuario) {
+        try {
+            const response = await fetch(`${API_URL}/usuarios/eliminar_usuario`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({id_usuario}),
+            });
+            const resultado = await response.json();
+            if (resultado.success) {
+                return {success: true, mensaje: resultado.mensaje};
+            }
+            return {success: false, error: resultado.error || 'Fallo al eliminar usuario'};
+        } catch (error) {
+            console.error("Error al eliminar usuario:", error);
+            return {success: false, error: "Error de conexión"};
+        }
     }
 
 }
-
-

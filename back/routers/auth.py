@@ -22,7 +22,6 @@ router = APIRouter(
 @router.post("/registro")
 async def registro(datos: dict):
     try:
-        print("Datos recibidos:", datos)
         usuario_existente = Usuario_service().verificar_email_existe(datos["email"])
         if usuario_existente:
             return {"success": False, "error": "Email ya registrado"}
@@ -74,7 +73,10 @@ async def login(datos: dict):
     try:
         usuario = Usuario_service().obtener_por_email(datos["email"])
         if not usuario:
-            return {"success": False, "error": "Datos incorrectos"}
+            return {"success": False, "error": "El usuario no existe"}
+
+        if usuario["estado"] != "Activo":
+            return {"success": False, "error": "Cuenta suspendida o inactiva"}
 
         if not evaluarHash(
                 datos["contrasena"],
@@ -85,15 +87,12 @@ async def login(datos: dict):
                 ID_Log=str(uuid.uuid4()),
                 id_usuario=usuario["ID_Usuario"],
                 descripcion=f"Intento de login fallido - {datos['email']}",
-                tipo="Login Fallido",
+                tipo="Login",
                 fecha_hora=datetime.now()
             )
             Log_service().crear(log)
 
             return {"success": False, "error": "Datos incorrectos"}
-
-        if usuario["estado"] != "Activo":
-            return {"success": False, "error": "Cuenta inactiva o suspendida"}
 
         # token
         token = Token_service.crear_token(user_id=usuario["ID_Usuario"])

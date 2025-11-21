@@ -57,7 +57,7 @@ async def ingresar(
         ID_Ingreso_boveda=str(uuid.uuid4()),
         fecha_hora=datetime.now(),
         aceptacion=entro,
-        resultado=f"{aceptacion_float:.2f}%",  # ✅ String formateado
+        resultado=f"{aceptacion_float:.2f}%",
         id_usuario=user_id
     )
 
@@ -66,7 +66,7 @@ async def ingresar(
     return {
         "success": True,
         "usuario": str(usuario.get("nombres", "Usuario")),
-        "similitud": round(aceptacion_float, 2),  # ✅ Redondear a 2 decimales
+        "similitud": round(aceptacion_float, 2),
         "coincide": entro
     }
 

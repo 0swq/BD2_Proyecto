@@ -37,7 +37,6 @@ async def perfil(token: str = Depends(oauth2_scheme)):
         )
 
     usuario = Usuario_service().obtener(user_id)
-    print(f"Usuario encontrado: {usuario}")
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
@@ -63,11 +62,8 @@ def get_registro_biometrico(token: str = Depends(oauth2_scheme)):
         )
 
     dato_biometrico = Datos_biometricos_service().listar_por_ID(user_id)
-    print(f"Dato biométrico obtenido: {dato_biometrico}")
-    print(f"Tipo: {type(dato_biometrico)}")
 
-    # Manejar diferentes tipos de respuesta
-    # Si es None o lista vacía, no existe registro
+
     if not dato_biometrico or (isinstance(dato_biometrico, list) and len(dato_biometrico) == 0):
         return {
             "success": True,
@@ -240,45 +236,6 @@ async def registrar_biometrico(token: str = Depends(oauth2_scheme), foto: Upload
     }
 
 
-@router.post("/obtener_registro_biometrico")
-def get_registro_biometrico(token: str = Depends(oauth2_scheme)):
-    user_id = decode_token(token)
-    if not user_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token inválido o expirado"
-        )
-
-    dato_biometrico = Datos_biometricos_service().listar_por_ID(user_id)
-    print(f"Dato biométrico obtenido: {dato_biometrico}")
-    print(f"Tipo: {type(dato_biometrico)}")
-
-    # Si no existe registro, devolver que no existe
-    if not dato_biometrico:
-        return {
-            "success": True,
-            "existe": False,
-            "ultimo_cambio": None
-        }
-
-    # Si existe, devolver los datos
-    fecha = dato_biometrico.get("ultima_actualizacion")
-    if not fecha:
-        # Si por alguna razón no tiene fecha, devolver None
-        return {
-            "success": True,
-            "existe": True,
-            "ultimo_cambio": None
-        }
-
-    # Convertir fecha a timestamp en milisegundos
-    return {
-        "success": True,
-        "existe": True,
-        "ultimo_cambio": int(fecha.timestamp() * 1000)
-    }
-
-
 @router.post("/log")
 def crear_log(datos: dict, token: str = Depends(oauth2_scheme)):
     user_id = decode_token(token)
@@ -303,7 +260,139 @@ def actualizar(datos: dict, token: str = Depends(oauth2_scheme)):
         if key in user_dict:
             user_dict[key] = value
 
-
     Usuario_service().modificar(user_dict)
 
     return {"success": True, "mensaje": "Datos actualizados"}
+
+
+@router.get("/obtener")
+def obtenerTodos(token: str = Depends(oauth2_scheme)):
+    user_id = decode_token(token)
+    usuarios = Usuario_service().listar()
+    resultado = []
+    for i in usuarios:
+        if i["ID_Usuario"] != user_id:
+            resultado.append({
+                "ID_Usuario": i["ID_Usuario"],
+                "nombres": i["nombres"],
+                "apellidos": i["apellidos"],
+                "foto_perfil": i["foto_perfil"],
+                "email": i["email"],
+                "fecha_registro": i["fecha_registro"],
+                "rol": i["rol"],
+                "estado": i["estado"]})
+
+    return {"success": True, "usuarios": resultado}
+
+
+@router.delete("/eliminar")
+def eliminarUsuario(token: str = Depends(oauth2_scheme)):
+    user_id = decode_token(token)
+    Usuario_service().eliminar(user_id)
+    return {"success": True}
+
+
+@router.put("/actualizar_usuario")
+def actualizarUsuario(datos: dict, token: str = Depends(oauth2_scheme)):
+    user_id = decode_token(token)
+    usuario = Usuario_service().obtener(user_id)
+
+    if usuario.get("rol") != "Admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No tienes permisos para actualizar otros usuarios"
+        )
+
+    id_solicitado = datos.get("id_usuario")
+    if not id_solicitado:
+        raise HTTPException(status_code=400, detail="ID de usuario requerido")
+
+    if user_id == id_solicitado:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No puedes modificar tu propia cuenta desde el panel de control. Usa tu perfil personal."
+        )
+
+    user_viejo = Usuario_service().obtener(id_solicitado)
+    if not user_viejo:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    user_dict = user_viejo.dict() if hasattr(user_viejo, "dict") else user_viejo
+
+    # Validar email si se está cambiando
+    if "email" in datos and datos["email"] != user_dict.get("email"):
+        email_existente = Usuario_service().verificar_email_existe(datos["email"])
+        if email_existente:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El correo electrónico ya está en uso por otro usuario"
+            )
+
+    if "nuevaContrasena" in datos and datos["nuevaContrasena"]:
+        nuevo_salt = os.urandom(16)
+        nuevo_hash = hashearContra(datos["nuevaContrasena"], nuevo_salt)
+        user_dict["contrasena_salt"] = nuevo_salt
+        user_dict["contrasena_hash"] = nuevo_hash
+
+    campos_actualizar = ["nombres", "apellidos", "email", "rol", "estado"]
+    for key in campos_actualizar:
+        if key in datos:
+            user_dict[key] = datos[key]
+
+    Usuario_service().modificar(user_dict)
+
+    log = Log(
+        ID_Log=str(uuid.uuid4()),
+        id_usuario=user_id,
+        descripcion=f"Usuario {user_dict['nombres']} {user_dict['apellidos']} actualizado por administrador",
+        tipo="Edicion",
+        fecha_hora=datetime.now()
+    )
+    Log_service().crear(log)
+
+    return {"success": True, "mensaje": "Usuario actualizado correctamente"}
+
+
+@router.post("/eliminar_usuario")
+def eliminarUsuarioEspecifico(datos: dict, token: str = Depends(oauth2_scheme)):
+    user_id = decode_token(token)
+    usuario = Usuario_service().obtener(user_id)
+
+    if usuario.get("rol") != "Admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No tienes permisos para eliminar otros usuarios"
+        )
+
+    id_usuario = datos.get("id_usuario")
+    if not id_usuario:
+        raise HTTPException(status_code=400, detail="ID de usuario requerido")
+
+    if user_id == id_usuario:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No puedes eliminar tu propia cuenta"
+        )
+
+    user_viejo = Usuario_service().obtener(id_usuario)
+    if not user_viejo:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    resultado = Usuario_service().eliminar(id_usuario)
+
+    if not resultado.get("success"):
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=resultado.get("error", "Error al eliminar usuario")
+        )
+
+    log = Log(
+        ID_Log=str(uuid.uuid4()),
+        id_usuario=user_id,
+        descripcion=f"Usuario {user_viejo['nombres']} {user_viejo['apellidos']} eliminado por administrador",
+        tipo="Eliminación",
+        fecha_hora=datetime.now()
+    )
+    Log_service().crear(log)
+
+    return {"success": True, "mensaje": "Usuario eliminado correctamente"}

@@ -1,5 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL;
 
+
+const API_URL = import.meta.env.VITE_API_URL;
 export const boveda_service = {
     async ingresar(token, archivo) {
         try {

@@ -1,8 +1,5 @@
 def cop(origen, afectado):
-    """
-    Copia solo los atributos que existen en afectado y que están en el dict de origen.
-    Ignora atributos internos de ORM.
-    """
+
     if hasattr(origen, "__dict__"):
         origen_dict = vars(origen)
     else:

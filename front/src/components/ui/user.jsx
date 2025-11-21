@@ -19,13 +19,14 @@ export default function User_card() {
         console.log("Sesion cerrada3");
         window.location.reload();
     }
+
     const urlFoto = fotoPerfilUrl || (usuario.foto_perfil ? `${API_URL}/fotos-perfil/${usuario.foto_perfil}` : null);
-    
+
     const fotoComponent = urlFoto ? (
-        <img 
-            src={urlFoto} 
-            alt="Foto de perfil del usuario" 
-            className="w-full bg-black/50 h-full rounded-full object-cover"
+        <img
+            src={urlFoto}
+            alt="Foto de perfil del usuario"
+            className="w-14 h-14 rounded-full object-cover"
         />
     ) : (
         <User className="w-6 h-6 text-gray-500"/>
@@ -43,8 +44,8 @@ export default function User_card() {
             </div>
             <div
                 onClick={() => navigate('/perfil')}
-                className="w-14 h-14 rounded-full flex items-center justify-center
-                           border-2 border-blue-500 overflow-hidden bg-black/50 cursor-pointer"
+                className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0
+                           border-2 border-blue-500 overflow-hidden bg-black/50 cursor-pointer"  // ← Agregado flex-shrink-0
             >
                 {fotoComponent}
             </div>

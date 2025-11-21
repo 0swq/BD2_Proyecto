@@ -95,7 +95,7 @@ const RegistroForm = () => {
                 <div
                     className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 border border-gray-700 shadow-2xl">
 
-                    <h1 className="text-white text-3xl font-bold text-center mb-8">
+                    <h1 className="text-white text-3xl font-quicksand text-center mb-8">
                         Registrarse
                     </h1>
 

@@ -4,7 +4,6 @@ import {Eye, EyeOff} from 'lucide-react';
 import {authService} from "../../services/auth_service.jsx";
 import {useAppContext} from "../../context/AppProvider.jsx";
 import {noti_util} from "../../utils/noti_util.jsx";
-import {toast} from "react-toastify";
 
 const LoginForm = () => {
     const navigate = useNavigate();
@@ -38,30 +37,26 @@ const LoginForm = () => {
             email: email,
             contrasena: password
         };
+
         setCargando(true);
-        const toastId = noti_util('cargando', 'Iniciando sesión...');
 
         try {
             const resultado = await authService.login(datos);
 
-            toast.dismiss(toastId);
-
             if (!resultado.success) {
-                throw new Error(
-                    resultado.message || `Error al iniciar sesión: ${resultado.error || "Desconocido"}`
-                );
+                noti_util("error", resultado.error || "Credenciales incorrectas");
+                setCargando(false);  // ← IMPORTANTE: Detener carga en caso de error
+                return;
             }
+
             login(resultado.token);
-            console.log("Inicio de sesión exitoso:", resultado.success);
             noti_util("exito", "Sesión iniciada correctamente");
             navigate('/dashboard');
 
         } catch (error) {
-            toast.dismiss(toastId);
             console.error("Error en el inicio de sesión:", error);
-            noti_util("error", "Email o contraseña incorrectos");
-        } finally {
-            setCargando(false);
+            noti_util("error", "Error de conexión. Intenta nuevamente");
+            setCargando(false);  // ← IMPORTANTE: Detener carga en caso de excepción
         }
     };
 
@@ -71,7 +66,7 @@ const LoginForm = () => {
                 <div
                     className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 border border-gray-700 shadow-2xl">
 
-                    <h1 className="text-white text-3xl font-bold text-center mb-8">
+                    <h1 className="text-white text-3xl font-quicksand text-center mb-8">
                         Iniciar Sesión
                     </h1>
                     <form onSubmit={handleLogin} className="space-y-6">

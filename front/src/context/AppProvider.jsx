@@ -9,6 +9,7 @@ export function AppProvider({children}) {
     const [bovedaAbierta, setBovedaAbierta] = useState(false);
     const [cargandoUsuario, setCargandoUsuario] = useState(true);
     const [fotoPerfilUrl, setFotoPerfilUrl] = useState(null);
+    const [administrador, setAdministrador] = useState(false);
 
     useEffect(() => {
         const cargarUsuario = async () => {
@@ -17,6 +18,7 @@ export function AppProvider({children}) {
                 const resultado = await usuarios_service.getUsuario(token);
                 if (resultado.success) {
                     setUsuario(resultado.usuario);
+                    setAdministrador(resultado.usuario.rol === 'Admin');
                 } else {
                     console.error('Error al cargar usuario:', resultado.error);
                     authService.logout();
@@ -24,16 +26,15 @@ export function AppProvider({children}) {
             }
             setCargandoUsuario(false);
         };
-
         cargarUsuario();
     }, []);
 
     const login = async (token) => {
         localStorage.setItem('token', token);
-
         const resultado = await usuarios_service.getUsuario(token);
         if (resultado.success) {
             setUsuario(resultado.usuario);
+            setAdministrador(resultado.usuario.rol === 'Admin');
         }
     };
 
@@ -42,17 +43,20 @@ export function AppProvider({children}) {
         setUsuario(null);
         setBovedaAbierta(false);
         setFotoPerfilUrl(null);
+        setAdministrador(false);
     };
 
     const actualizarFotoPerfil = (nuevaUrl) => {
         setFotoPerfilUrl(nuevaUrl);
     };
+
     const recargarUsuario = async () => {
         if (authService.estaAutenticado()) {
             const token = authService.obtenerToken();
             const resultado = await usuarios_service.getUsuario(token);
             if (resultado.success) {
                 setUsuario(resultado.usuario);
+                setAdministrador(resultado.usuario.rol === 'Admin');
                 return resultado.usuario;
             } else {
                 console.error('Error al recargar usuario:', resultado.error);
@@ -63,7 +67,6 @@ export function AppProvider({children}) {
     };
 
     const logeado = authService.estaAutenticado();
-    const administrador = usuario?.rol === 'Administrador';
     const token = authService.obtenerToken();
 
     return (
@@ -75,7 +78,7 @@ export function AppProvider({children}) {
                 setBovedaAbierta,
                 logeado,
                 administrador,
-                token,
+                setAdministrador,
                 login,
                 logout,
                 cargandoUsuario,

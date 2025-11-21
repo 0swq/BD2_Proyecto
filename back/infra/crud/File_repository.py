@@ -116,11 +116,11 @@ class FileMongo(FileInterface):
 
     def get(self, id):
         db = conexionMongo.get_db()
-        return db.FileNOSQL.find_one({"_id": id})
+        return db.FileNOSQL.find_one({"ID_File": id})
 
     def delete(self, id):
         db = conexionMongo.get_db()
-        result = db.FileNOSQL.delete_one({"_id": id})
+        result = db.FileNOSQL.delete_one({"ID_File": id})
         return result.deleted_count > 0
 
     def update(self, file):
@@ -134,13 +134,13 @@ class FileMongo(FileInterface):
 
     def list(self):
         db = conexionMongo.get_db()
-        logs = db.FileNOSQL.find()
-        return [{**log, "ID_File": str(log["_id"])} for log in logs]
+        files = db.FileNOSQL.find()
+        return [{**f, "ID_File": str(f["ID_File"])} for f in files]
 
     def list_ID_Usuario(self, id_usuario):
         db = conexionMongo.get_db()
-        logs = db.FileNOSQL.find({"id_usuario": id_usuario})
-        return [{**log, "ID_File": str(log["_id"])} for log in logs]
+        files = db.FileNOSQL.find({"id_usuario": id_usuario})
+        return [{**f, "ID_File": str(f["ID_File"])} for f in files]
 
 
 class FileCassandra(FileInterface):

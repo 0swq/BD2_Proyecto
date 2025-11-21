@@ -21,9 +21,8 @@ def decode_token(token: str):
     print("Decode")
     try:
         payload = jwt.decode(token, KEY, algorithms=[ALGORITMO])
-        print("payload:", payload)
+
         user_id = payload["sub"]
-        print(f"extraido del token:  {user_id}")
         if user_id is not None:
             user_id = str(user_id)
         if user_id is None:

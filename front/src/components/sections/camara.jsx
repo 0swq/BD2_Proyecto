@@ -70,11 +70,6 @@ const BiometricVault = () => {
             const file = new File([blob], "rostro.jpg", {type: "image/jpeg"});
 
             const token = authService.obtenerToken();
-            if (!token) {
-                noti_util("error", "Sesión caducada. Inicia sesión nuevamente", loadingToast);
-                return;
-            }
-
             const resultado = await boveda_service.ingresar(token, file);
 
             console.log("Resultado biométrico:", resultado);
@@ -83,7 +78,6 @@ const BiometricVault = () => {
                 if (resultado.coincide) {
                     noti_util("exito", `Verificación exitosa. Similitud: ${resultado.similitud}%`, loadingToast);
                     setBovedaAbierta(true)
-                    window.location.reload();
 
                 } else {
                     const mensaje = resultado.similitud !== undefined
