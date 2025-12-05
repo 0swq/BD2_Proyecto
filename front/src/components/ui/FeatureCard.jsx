@@ -10,3 +10,4 @@ export default function FeatureCard({ title, subtitle, description, icon: Icon }
     </div>
   );
 }
+

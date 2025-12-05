@@ -4,9 +4,9 @@ import Header from '../components/layout/Header.jsx';
 import Footer from '../components/layout/Footer.jsx';
 import HeroSection from '../components/sections/HeroSection.jsx';
 import UploadSection from '../components/sections/UploadSection.jsx';
-import PricingSection from '../components/sections/PricingSection.jsx';
 import VaultSection from '../components/sections/VaultSection.jsx';
 import '../App.css';
+import Funcionamiento from "../components/sections/Funcionamiento.jsx";
 
 export default function Inicio() {
     return (
@@ -14,7 +14,7 @@ export default function Inicio() {
             <Header/>
             <HeroSection/>
             <UploadSection/>
-            <PricingSection/>
+            <Funcionamiento/>
             <VaultSection/>
             <Footer/>
         </div>

@@ -26,3 +26,4 @@ class CassandraConnection:
             self.sesion.shutdown()
         if self.cluster:
             self.cluster.shutdown()
+

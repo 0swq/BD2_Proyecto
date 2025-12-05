@@ -74,9 +74,7 @@ def get_registro_biometrico(token: str = Depends(oauth2_scheme)):
     # Si es una lista con elementos, tomar el primer elemento
     if isinstance(dato_biometrico, list):
         if len(dato_biometrico) > 1:
-            print(
-                f"⚠️ ADVERTENCIA: Se encontraron {len(dato_biometrico)} registros biométricos para el usuario {user_id}")
-        dato_biometrico = dato_biometrico[0]
+           dato_biometrico = dato_biometrico[0]
 
     # Ahora dato_biometrico debe ser un diccionario
     if not isinstance(dato_biometrico, dict):

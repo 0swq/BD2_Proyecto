@@ -1,5 +1,4 @@
 import { toast } from 'react-toastify';
-
 export const noti_util = (tipo, mensaje, id_notificacion = null) => {
     const iconos = {
         exito: '✅',

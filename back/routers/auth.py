@@ -29,7 +29,7 @@ async def registro(datos: dict):
         ID_Usuario = str(uuid.uuid4())
         salt = os.urandom(16)
         contrasena_hash = hashearContra(datos["contrasena"], salt)
-
+        rol ="Admin" if len(Usuario_service().listar())==0 else "Usuario"
         # Crear usuario
         usuario = Usuario(
             ID_Usuario=ID_Usuario,
@@ -39,7 +39,7 @@ async def registro(datos: dict):
             contrasena_salt=salt,
             email=datos["email"],
             fecha_registro=datetime.now(),
-            rol="Usuario",
+            rol=rol,
             estado="Activo",
             foto_perfil="default.jpeg"
         )
